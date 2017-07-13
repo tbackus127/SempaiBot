@@ -1,0 +1,2 @@
+# SempaiBot
+Discord Bot
