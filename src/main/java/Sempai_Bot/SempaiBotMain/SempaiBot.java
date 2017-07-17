@@ -1,8 +1,16 @@
 package Sempai_Bot.SempaiBotMain;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,27 +33,44 @@ public class SempaiBot extends ListenerAdapter {
 	public static PrintStream prnt = null;
 
 	public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException,
-			RateLimitedException, FileNotFoundException {
+			RateLimitedException, ClassNotFoundException, IOException {
+		
+		constructGlueCount();
+		
 		JDA sBot = new JDABuilder(AccountType.BOT).setToken("MzM1MTE0MjY0NjE4NDY3MzI4.DEn_Rw.hfyjF9_lMiQIRvJgxPndT8XyJdE").buildBlocking();
 		sBot.addEventListener(new SempaiBot());
-		prnt = new PrintStream(f);
-		if (glueCount.size() == 0) {
-			constructGlueCount();
-		}
-
 	}
 
-	private static void constructGlueCount() throws ClassNotFoundException {
+	@SuppressWarnings("unchecked")
+	private static void constructGlueCount() {
+		
 		try {
 			FileInputStream fileIn = new FileInputStream(f);
-	        ObjectInputStream in = new ObjectInputStream(fileIn);
-	        glueCount = (HashMap<String, Integer>) in.readObject();
-	        in.close();
-	        fileIn.close();
-	      }catch(IOException i) {
-	         i.printStackTrace();
-	         return;
-	      }
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+		
+			glueCount = (HashMap<String, Integer>)in.readObject();
+	        
+			in.close();
+			fileIn.close();
+		} catch(IOException i){
+			i.printStackTrace();
+			return;
+		} catch(ClassNotFoundException c) {
+			System.out.println("Class not Found.");
+			c.printStackTrace();
+		}
+        
+		System.out.println("glueCount Data Reloaded.");
+        
+		// Print HashMap Contents, to be removed in final.
+		Set s = glueCount.entrySet();
+		Iterator i = s.iterator();
+		while(i.hasNext()) {
+			Map.Entry<String, Integer> m = (Map.Entry<String, Integer>)i.next();
+			System.out.println("Key: " + m.getKey());
+			System.out.println("Value: " + m.getValue());
+		}
+        
 	}
 
 	private static void saveGlueCount() {
@@ -56,7 +81,7 @@ public class SempaiBot extends ListenerAdapter {
 	         out.writeObject(glueCount);
 	         out.close();
 	         fileOut.close();
-	         System.out.printf("Serialized data is saved in ~/UserList.ser");
+	         System.out.printf("Serialized data is saved in \"~/UserList.ser\".");
 	      }catch(IOException i) {
 	         i.printStackTrace();
 	      }
@@ -114,6 +139,18 @@ public class SempaiBot extends ListenerAdapter {
 			saveGlueCount();
 
 
+		}
+		
+		if(objMsg.getContent().equals("!GlueCount") && !objUser.getName().equals("Senpai-Bot")) {
+			
+			String h = "";
+			if (glueCount.get("Global") == 1)
+				h += "horse";
+			else
+				h += "horses";
+			
+			objChannel.sendMessage("So far osu! University has contributed to the melting of " + glueCount.get("Global")
+							+ " " + h + ".").queue();
 		}
 
 	}
