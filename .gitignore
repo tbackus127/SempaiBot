@@ -10,6 +10,8 @@ tmp/
 local.properties
 .settings/
 .loadpath
+UserList.ser
+pom.xml
 
 # Eclipse Core
 .project
