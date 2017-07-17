@@ -1,7 +1,6 @@
 package Sempai_Bot.SempaiBotMain;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -22,7 +21,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class SempaiBot extends ListenerAdapter {
 	public static HashMap<String, Integer> glueCount = new HashMap<String, Integer>();
-	public static File f = new File("UserList.txt");
+	public static File f = new File("UserList.ser");
 	public static PrintStream prnt = null;
 
 	public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException,
@@ -36,8 +35,31 @@ public class SempaiBot extends ListenerAdapter {
 
 	}
 
-	private static void constructGlueCount() {
+	private static void constructGlueCount() throws ClassNotFoundException {
+		try {
+			FileInputStream fileIn = new FileInputStream(f);
+	        ObjectInputStream in = new ObjectInputStream(fileIn);
+	        glueCount = (HashMap<String, Integer>) in.readObject();
+	        in.close();
+	        fileIn.close();
+	      }catch(IOException i) {
+	         i.printStackTrace();
+	         return;
+	      }
+	}
 
+	private static void saveGlueCount() {
+		try {
+	         FileOutputStream fileOut =
+	         new FileOutputStream(f);
+	         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	         out.writeObject(glueCount);
+	         out.close();
+	         fileOut.close();
+	         System.out.printf("Serialized data is saved in ~/UserList.ser");
+	      }catch(IOException i) {
+	         i.printStackTrace();
+	      }
 	}
 
 	@Override
@@ -88,6 +110,8 @@ public class SempaiBot extends ListenerAdapter {
 							+ " to be melted. In total " + objUser.getName() + " has melted "
 							+ glueCount.get(objUser.getName()) + " " + h1 + "\n \n"
 							+ "To see the total number of horses melted in " + "this chat type \"!GlueCount\".").queue();
+			
+			saveGlueCount();
 
 
 		}
