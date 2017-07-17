@@ -20,15 +20,16 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 
 public class SempaiBot extends ListenerAdapter {
-	public static HashMap<String, Integer> glueCount = new HashMap<String, Integer>();
-	public static File f = new File("UserList.ser");
-	public static PrintStream prnt = null;
+  
+  private static final String SAVEDATA_FILENAME = "UserList.ser";
+  
+	private static HashMap<String, Integer> glueCount = new HashMap<String, Integer>();
+	private static File fileSaveData = new File(SAVEDATA_FILENAME);
 
 	public static void main(String[] args) throws LoginException, IllegalArgumentException, InterruptedException,
 			RateLimitedException, FileNotFoundException {
 		JDA sBot = new JDABuilder(AccountType.BOT).setToken("MzM1MTE0MjY0NjE4NDY3MzI4.DEn_Rw.hfyjF9_lMiQIRvJgxPndT8XyJdE").buildBlocking();
 		sBot.addEventListener(new SempaiBot());
-		prnt = new PrintStream(f);
 		if (glueCount.size() == 0) {
 			constructGlueCount();
 		}
@@ -37,7 +38,7 @@ public class SempaiBot extends ListenerAdapter {
 
 	private static void constructGlueCount() throws ClassNotFoundException {
 		try {
-			FileInputStream fileIn = new FileInputStream(f);
+			FileInputStream fileIn = new FileInputStream(fileSaveData);
 	        ObjectInputStream in = new ObjectInputStream(fileIn);
 	        glueCount = (HashMap<String, Integer>) in.readObject();
 	        in.close();
@@ -51,12 +52,12 @@ public class SempaiBot extends ListenerAdapter {
 	private static void saveGlueCount() {
 		try {
 	         FileOutputStream fileOut =
-	         new FileOutputStream(f);
+	         new FileOutputStream(fileSaveData);
 	         ObjectOutputStream out = new ObjectOutputStream(fileOut);
 	         out.writeObject(glueCount);
 	         out.close();
 	         fileOut.close();
-	         System.out.printf("Serialized data is saved in ~/UserList.ser");
+	         System.out.printf("Serialized data is saved in \"" + SAVEDATA_FILENAME + "\".");
 	      }catch(IOException i) {
 	         i.printStackTrace();
 	      }
